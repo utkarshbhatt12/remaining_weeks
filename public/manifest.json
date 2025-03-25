@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Remaining Weeks",
+  "description": "A chrome extension to show remaining weeks in your life",
+  "version": "1.0.0",
+  "icons": {
+    "16": "icon.png",
+    "32": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  },
+  "chrome_url_overrides": {
+    "newtab": "index.html"
+  },
+  "permissions": [
+    "storage",
+    "topSites"
+  ],
+  "host_permissions": []
+}

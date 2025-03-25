@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: 20 150 150;
+  --primary-foreground: 255 255 255;
+}
+
+@layer base {
+  body {
+    @apply bg-gray-900;
+  }
+}
+
+.bg-primary {
+  background-color: rgb(var(--primary));
+}
+
+.hover\:bg-primary\/90:hover {
+  background-color: rgb(var(--primary) / 0.9);
+}
+
+.text-primary-foreground {
+  color: rgb(var(--primary-foreground));
+}
+

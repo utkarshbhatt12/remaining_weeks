@@ -1,0 +1,45 @@
+{
+  "name": "remaining_weeks",
+  "version": "1.2.0",
+  "description": "A chrome extension to show remaining weeks in your life",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "webpack --config webpack/webpack.dev.js --watch",
+    "build": "webpack --config webpack/webpack.prod.js",
+    "postbuild": "cd dist && rm -rf dist && zip -r dist.zip *",
+    "clean": "rimraf dist",
+    "style": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "update-all-deps": "npm update --save"
+  },
+  "author": "Utkarsh Bhatt",
+  "dependencies": {
+    "@types/chrome": "^0.0.270",
+    "lucide-react": "^0.441.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.5",
+    "@types/react-dom": "^18.3.0",
+    "copy-webpack-plugin": "^12.0.2",
+    "css-loader": "^7.1.2",
+    "glob": "^11.0.0",
+    "postcss": "^8.4.47",
+    "postcss-loader": "^8.1.1",
+    "postcss-preset-env": "^10.0.3",
+    "prettier": "^3.3.3",
+    "rimraf": "^6.0.1",
+    "style-loader": "^4.0.0",
+    "tailwindcss": "^3.4.17",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.5.4",
+    "webpack": "^5.94.0",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^5.1.0",
+    "webpack-merge": "^6.0.1"
+  },
+  "prettier": {
+    "semi": true,
+    "singleQuote": true
+  }
+}
