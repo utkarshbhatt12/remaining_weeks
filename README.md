@@ -1,6 +1,6 @@
-# Downloads Shortcut
+# Remaining Weeks
 
-With this extension, you can have quick access to your downloads in a simple popup. You can also search from your downloads without going to Chrome's downloads page.
+A Chrome extension which shows the remaining weeks in your life.
 
 ## Category
 
