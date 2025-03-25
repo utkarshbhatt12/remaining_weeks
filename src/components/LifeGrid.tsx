@@ -1,6 +1,4 @@
-"use client";
-
-import React, { useMemo } from "react";
+import React, { useMemo } from 'react';
 
 interface LifeGridProps {
   birthdate: Date;
@@ -19,7 +17,7 @@ export default function LifeGrid({ birthdate }: LifeGridProps) {
 
     // Calculate weeks lived
     const weeksLived = Math.floor(
-      (currentTime - birthTime) / (7 * 24 * 60 * 60 * 1000)
+      (currentTime - birthTime) / (7 * 24 * 60 * 60 * 1000),
     );
 
     // Calculate weeks left
@@ -72,7 +70,7 @@ export default function LifeGrid({ birthdate }: LifeGridProps) {
               {row.map((week) => (
                 <div
                   key={week.index}
-                  className={`w-3 h-3 rounded-sm ${week.isLived ? "bg-emerald-600" : "bg-gray-700"}`}
+                  className={`w-3 h-3 rounded-sm ${week.isLived ? 'bg-emerald-600' : 'bg-gray-700'}`}
                   title={`Week ${week.index + 1}`}
                 />
               ))}

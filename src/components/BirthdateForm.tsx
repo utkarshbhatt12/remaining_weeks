@@ -1,20 +1,18 @@
-"use client";
-
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
 interface BirthdateFormProps {
   onSubmit: (date: Date) => void;
 }
 
 export default function BirthdateForm({ onSubmit }: BirthdateFormProps) {
-  const [date, setDate] = useState("");
-  const [error, setError] = useState("");
+  const [date, setDate] = useState('');
+  const [error, setError] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!date) {
-      setError("Please enter your birth date");
+      setError('Please enter your birth date');
       return;
     }
 
@@ -22,7 +20,7 @@ export default function BirthdateForm({ onSubmit }: BirthdateFormProps) {
     const today = new Date();
 
     if (birthDate > today) {
-      setError("Birth date cannot be in the future");
+      setError('Birth date cannot be in the future');
       return;
     }
 
@@ -50,10 +48,10 @@ export default function BirthdateForm({ onSubmit }: BirthdateFormProps) {
             value={date}
             onChange={(e) => {
               setDate(e.target.value);
-              setError("");
+              setError('');
             }}
             className="w-full px-4 py-2 rounded-md border border-gray-600 bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
-            max={new Date().toISOString().split("T")[0]}
+            max={new Date().toISOString().split('T')[0]}
           />
           {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
         </div>

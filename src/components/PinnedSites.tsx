@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 interface PinnedSitesProps {
   sites: chrome.topSites.MostVisitedURL[];
@@ -29,11 +29,11 @@ export default function PinnedSites({ sites }: PinnedSitesProps) {
               onError={(e) => {
                 // If favicon fails to load, show the first letter of the site
                 const target = e.target as HTMLElement;
-                target.style.display = "none";
+                target.style.display = 'none';
                 target.parentElement!.innerHTML = site.title
                   .charAt(0)
                   .toUpperCase();
-                target.parentElement!.className += " text-xl font-bold";
+                target.parentElement!.className += ' text-xl font-bold';
               }}
             />
           </div>

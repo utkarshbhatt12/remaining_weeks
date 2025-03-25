@@ -1,9 +1,10 @@
-"use client";
+'use client';
 
-import React, { useEffect, useState } from "react";
-import LifeGrid from "./components/LifeGrid";
-import BirthdateForm from "./components/BirthdateForm";
-import PinnedSites from "./components/PinnedSites";
+import React, { useEffect, useState } from 'react';
+
+import LifeGrid from './components/LifeGrid';
+import BirthdateForm from './components/BirthdateForm';
+import PinnedSites from './components/PinnedSites';
 
 export default function App() {
   const [birthdate, setBirthdate] = useState<Date | null>(null);
@@ -15,14 +16,14 @@ export default function App() {
   useEffect(() => {
     // Load birthdate from Chrome storage
     try {
-      chrome.storage.sync.get(["birthdate"], (result) => {
+      chrome.storage.sync.get(['birthdate'], (result) => {
         if (result.birthdate) {
           setBirthdate(new Date(result.birthdate));
         }
         setLoading(false);
       });
     } catch (e) {
-      console.warn("Chrome storage not available.", e);
+      console.warn('Chrome storage not available.', e);
       setLoading(false);
     }
 
@@ -34,7 +35,7 @@ export default function App() {
         });
       }
     } catch (e) {
-      console.warn("Chrome topSites not available.", e);
+      console.warn('Chrome topSites not available.', e);
     }
   }, []);
 
@@ -43,7 +44,7 @@ export default function App() {
     try {
       chrome.storage.sync.set({ birthdate: date.toISOString() });
     } catch (e) {
-      console.warn("Chrome storage not available.", e);
+      console.warn('Chrome storage not available.', e);
     }
   };
 
