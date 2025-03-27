@@ -1,94 +1,129 @@
-import React, { useMemo } from 'react';
+import React, { useMemo } from "react";
 
 interface LifeGridProps {
-  birthdate: Date;
+  birthDate: Date;
+  lifeExpectancy?: number;
 }
 
-export default function LifeGrid({ birthdate }: LifeGridProps) {
-  // Average life expectancy (in years)
-  const LIFE_EXPECTANCY = 80;
-  // Total weeks in expected lifetime
-  const TOTAL_WEEKS = LIFE_EXPECTANCY * 52;
-
-  const weeksData = useMemo(() => {
+const LifeGrid: React.FC<LifeGridProps> = ({
+  birthDate,
+  lifeExpectancy = 80,
+}) => {
+  // Calculate weeks lived and remaining
+  const calculateWeeks = () => {
     const today = new Date();
-    const birthTime = birthdate.getTime();
-    const currentTime = today.getTime();
+    const millisecondsPerWeek = 7 * 24 * 60 * 60 * 1000;
 
-    // Calculate weeks lived
     const weeksLived = Math.floor(
-      (currentTime - birthTime) / (7 * 24 * 60 * 60 * 1000),
+      (today.getTime() - birthDate.getTime()) / millisecondsPerWeek
     );
+    const weeksRemaining = Math.max(0, lifeExpectancy * 52 - weeksLived);
 
-    // Calculate weeks left
-    const weeksLeft = Math.max(0, TOTAL_WEEKS - weeksLived);
+    return { weeksLived, weeksRemaining };
+  };
 
-    return {
-      weeksLived,
-      weeksLeft,
-      total: TOTAL_WEEKS,
-    };
-  }, [birthdate]);
+  // Generate weeks grid
+  const generateWeeksGrid = () => {
+    const { weeksLived, weeksRemaining } = calculateWeeks();
+    const totalWeeks = lifeExpectancy * 52;
 
-  // Create grid with 52 columns (weeks per year)
-  const grid = useMemo(() => {
-    const rows = Math.ceil(TOTAL_WEEKS / 52);
-    const result = [];
+    const grid = [];
+    for (let year = 0; year < lifeExpectancy; year++) {
+      const yearData = {
+        year: year + 1,
+        quarters: [],
+      } as {
+        year: number;
+        quarters: { week: number; color: string }[][];
+      };
 
-    for (let i = 0; i < rows; i++) {
-      const row = [];
-      for (let j = 0; j < 52; j++) {
-        const weekIndex = i * 52 + j;
-        if (weekIndex < TOTAL_WEEKS) {
-          const isLived = weekIndex < weeksData.weeksLived;
-          row.push({ index: weekIndex, isLived });
+      // Create 4 quarters, each with 13 weeks
+      for (let quarter = 0; quarter < 4; quarter++) {
+        const quarterWeeks = [];
+        for (let week = 0; week < 13; week++) {
+          const currentWeek = year * 52 + quarter * 13 + week;
+
+          // Determine color intensity based on weeks lived
+          const percentageLived = (currentWeek / totalWeeks) * 100;
+          let bgColor = "bg-gray-700";
+          let liveColor = "bg-green-700";
+
+          if (currentWeek < weeksLived) {
+            // Lived weeks - green gradient
+            const intensity =
+              Math.floor(Math.min(percentageLived, 100) / 5) * 100;
+            bgColor = `${liveColor}`;
+          }
+
+          quarterWeeks.push({
+            week: currentWeek,
+            color: bgColor,
+          });
         }
+        yearData.quarters.push(quarterWeeks);
       }
-      result.push(row);
+
+      grid.push(yearData);
     }
 
-    return result;
-  }, [weeksData]);
+    return grid;
+  };
+
+  const weeksGrid = useMemo(generateWeeksGrid, [birthDate, lifeExpectancy]);
+  const { weeksLived, weeksRemaining } = calculateWeeks();
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <div>
-          <span className="text-lg font-medium">Weeks lived: </span>
-          <span className="text-lg">{weeksData.weeksLived}</span>
-        </div>
-        <div>
-          <span className="text-lg font-medium">Weeks left: </span>
-          <span className="text-lg">{weeksData.weeksLeft}</span>
-        </div>
+    <div className="w-full max-w-7xl mx-auto p-4 bg-gray-900 text-gray-100 rounded-lg shadow-lg">
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold text-gray-100">
+          Life Weeks Visualization
+        </h2>
       </div>
+      <div className="space-y-4">
+        <div className="text-center">
+          <p className="text-lg">
+            <span className="font-bold text-green-400">{weeksLived}</span> weeks
+            lived
+          </p>
+          <p className="text-lg">
+            <span className="font-bold text-gray-400">{weeksRemaining}</span>{" "}
+            weeks remaining
+          </p>
+        </div>
 
-      <div className="bg-gray-800 rounded-lg p-4 shadow-md">
-        <div className="space-y-1">
-          {grid.map((row, rowIndex) => (
-            <div key={rowIndex} className="flex space-x-1">
-              {row.map((week) => (
-                <div
-                  key={week.index}
-                  className={`w-3 h-3 rounded-sm ${week.isLived ? 'bg-emerald-600' : 'bg-gray-700'}`}
-                  title={`Week ${week.index + 1}`}
-                />
-              ))}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+          {weeksGrid.map((yearData) => (
+            <div
+              key={yearData.year}
+              className="border rounded-lg p-2 flex flex-col items-center bg-gray-800 border-gray-700"
+            >
+              <div className="text-sm font-semibold text-gray-300 mb-2">
+                Year {yearData.year}
+              </div>
+              <div className="flex flex-col space-y-1">
+                {yearData.quarters.map((quarter, quarterIndex) => (
+                  <div key={quarterIndex} className="flex">
+                    {quarter.map((weekData) => (
+                      <div
+                        key={weekData.week}
+                        className={`w-3 h-3 ${weekData.color} border border-gray-900`}
+                        title={`Week ${weekData.week}`}
+                      />
+                    ))}
+                  </div>
+                ))}
+              </div>
             </div>
           ))}
         </div>
 
-        <div className="mt-4 flex items-center text-sm text-gray-400">
-          <div className="flex items-center mr-4">
-            <div className="w-3 h-3 bg-emerald-600 rounded-sm mr-1"></div>
-            <span>Weeks lived</span>
-          </div>
-          <div className="flex items-center">
-            <div className="w-3 h-3 bg-gray-700 rounded-sm mr-1"></div>
-            <span>Weeks remaining</span>
-          </div>
+        <div className="text-sm text-gray-400 text-center px-4">
+          Each box represents one week of your life (based on {lifeExpectancy}
+          -year expectancy)
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default LifeGrid;

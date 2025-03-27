@@ -1,56 +1,51 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
-import LifeGrid from './components/LifeGrid';
-import BirthdateForm from './components/BirthdateForm';
-import PinnedSites from './components/PinnedSites';
+import LifeGrid from "./components/LifeGrid";
+import BirthdateForm from "./components/BirthdateForm";
+import PinnedSites from "./components/PinnedSites";
 
 export default function App() {
-  const [birthdate, setBirthdate] = useState<Date | null>(null);
+  const [birthDate, setBirthdate] = useState<Date | null>(null);
   const [pinnedSites, setPinnedSites] = useState<
     chrome.topSites.MostVisitedURL[]
   >([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Load birthdate from Chrome storage
-    try {
-      chrome.storage.sync.get(['birthdate'], (result) => {
-        if (result.birthdate) {
-          setBirthdate(new Date(result.birthdate));
-        }
-        setLoading(false);
-      });
-    } catch (e) {
-      console.warn('Chrome storage not available.', e);
-      setLoading(false);
-    }
+    console.log("App mounted");
 
-    // Get top sites
-    try {
-      if (chrome.topSites) {
-        chrome.topSites.get((sites) => {
-          setPinnedSites(sites.slice(0, 8)); // Limit to 8 sites
-        });
+    // Load birthdate from Chrome storage
+    chrome.storage.sync.get(["birthdate"], (result) => {
+      console.log("Storage result:", result);
+
+      if (result.birthdate) {
+        setBirthdate(new Date(result.birthdate));
       }
-    } catch (e) {
-      console.warn('Chrome topSites not available.', e);
-    }
+
+      setLoading(false);
+    });
+
+    chrome.topSites.get((sites) => {
+      console.log("Top sites:", sites);
+      setPinnedSites(sites.slice(0, 8)); // Limit to 8 sites
+    });
   }, []);
 
   const handleBirthdateSubmit = (date: Date) => {
+    console.log("Birthdate submitted:", date);
     setBirthdate(date);
     try {
       chrome.storage.sync.set({ birthdate: date.toISOString() });
     } catch (e) {
-      console.warn('Chrome storage not available.', e);
+      console.warn("Chrome storage not available.", e);
     }
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex items-center justify-center h-screen bg-gray-900 text-gray-100">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
       </div>
     );
@@ -59,7 +54,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 p-8">
       <div className="max-w-6xl mx-auto">
-        {!birthdate ? (
+        {!birthDate ? (
           <div className="flex items-center justify-center h-screen">
             <BirthdateForm onSubmit={handleBirthdateSubmit} />
           </div>
@@ -72,7 +67,7 @@ export default function App() {
               </p>
             </header>
 
-            <LifeGrid birthdate={birthdate} />
+            <LifeGrid birthDate={birthDate} />
 
             <div className="mt-12">
               <h2 className="text-xl font-semibold mb-4">Your Pinned Sites</h2>

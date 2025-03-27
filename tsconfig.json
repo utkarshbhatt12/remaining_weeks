@@ -9,7 +9,7 @@
     "rootDir": "src",
     "outDir": "dist/js",
     "noEmitOnError": true,
-    "jsx": "react",
+    "jsx": "react-jsx",
     "typeRoots": ["node_modules/@types"],
     "types": [
       // Support for: https://www.npmjs.com/package/@types/chrome
@@ -20,5 +20,6 @@
       // Run: `npm i --save-dev @types/jest`
     ]
   },
-  "include": ["src/**/*"]
+  "include": ["src"],
+  "references": [{ "path": "./tsconfig.node.json" }]
 }
