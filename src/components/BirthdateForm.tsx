@@ -91,6 +91,18 @@ export default function BirthdateForm({ onSubmit }: BirthdateFormProps) {
         >
           Get Started
         </button>
+
+        <div className="text-center text-xs text-muted-foreground mt-4">
+          By using this extension, you agree to our{' '}
+          <a
+            href="https://bigcodenerd.org/remaining-weeks-privacy-policy/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:underline"
+          >
+            Privacy Policy
+          </a>
+        </div>
       </form>
     </div>
   );
