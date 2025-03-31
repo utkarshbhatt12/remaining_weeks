@@ -5,7 +5,7 @@ interface BirthdateFormProps {
 }
 
 export default function BirthdateForm({ onSubmit }: BirthdateFormProps) {
-  const [date, setDate] = useState('');
+  const [date, setDate] = useState('2000-01-01');
   const [error, setError] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
