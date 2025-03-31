@@ -12,8 +12,8 @@ const LifeGrid: React.FC<LifeGridProps> = ({
   birthDate,
   lifeExpectancy = 80,
 }) => {
-  // State to track available space
-  const [boxSize, setBoxSize] = useState(8);
+  // State to track available space - increased default size from 12 to 18
+  const [boxSize, setBoxSize] = useState(18);
   const [columnsPerRow, setColumnsPerRow] = useState(10);
 
   // Calculate weeks lived and remaining
@@ -27,6 +27,28 @@ const LifeGrid: React.FC<LifeGridProps> = ({
     const weeksRemaining = Math.max(0, lifeExpectancy * 52 - weeksLived);
 
     return { weeksLived, weeksRemaining, currentYear: today.getFullYear() };
+  };
+
+  // Format date range for a specific week
+  const getWeekDateRange = (weekIndex: number): string => {
+    // Calculate the start date of this week (birthDate + weekIndex weeks)
+    const weekStartDate = new Date(birthDate.getTime());
+    weekStartDate.setDate(birthDate.getDate() + weekIndex * 7);
+
+    // Calculate the end date (start date + 6 days)
+    const weekEndDate = new Date(weekStartDate.getTime());
+    weekEndDate.setDate(weekStartDate.getDate() + 6);
+
+    // Format dates
+    const formatDate = (date: Date): string => {
+      return date.toLocaleDateString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      });
+    };
+
+    return `${formatDate(weekStartDate)} - ${formatDate(weekEndDate)}`;
   };
 
   // Generate weeks grid
@@ -49,7 +71,7 @@ const LifeGrid: React.FC<LifeGridProps> = ({
         year: number;
         actualYear: number;
         isCurrentYear: boolean;
-        quarters: { week: number; color: string }[][];
+        quarters: { week: number; color: string; dateRange: string }[][];
       };
 
       // Create 4 quarters, each with 13 weeks
@@ -64,9 +86,13 @@ const LifeGrid: React.FC<LifeGridProps> = ({
               ? 'var(--weekLived)'
               : 'var(--weekRemaining)';
 
+          // Get date range for this week
+          const dateRange = getWeekDateRange(currentWeek);
+
           quarterWeeks.push({
             week: currentWeek,
             color: bgColor,
+            dateRange: dateRange,
           });
         }
         yearData.quarters.push(quarterWeeks);
@@ -91,8 +117,8 @@ const LifeGrid: React.FC<LifeGridProps> = ({
       const availableWidth = width - 80; // Increased padding from 40 to 80
 
       // Each year needs space for 4 rows of weeks plus padding and year label
-      const yearHeight = 4 * boxSize + 30; // 4 rows + padding + label
-      const yearWidth = 13 * boxSize + 20; // 13 columns + padding
+      const yearHeight = 4 * boxSize + 40; // 4 rows + padding + label
+      const yearWidth = 13 * boxSize + 30; // 13 columns + padding
 
       // Calculate how many years we can fit per row
       const yearsPerRow = Math.floor(availableWidth / yearWidth);
@@ -106,9 +132,9 @@ const LifeGrid: React.FC<LifeGridProps> = ({
       // If we can't fit all years, adjust the box size
       if (totalYearsVisible < lifeExpectancy) {
         // Calculate new box size to fit all years
-        // Set minimum box size to 6 to ensure dots are visible
+        // Set minimum box size to 12 (increased from 8) to ensure dots are visible
         const newBoxSize = Math.max(
-          6,
+          12,
           Math.floor(
             Math.min(
               availableWidth / (13 * Math.ceil(lifeExpectancy / maxYearRows)),
@@ -178,18 +204,18 @@ const LifeGrid: React.FC<LifeGridProps> = ({
           </p>
         </div>
 
-        <div className={`grid ${getGridColumnsClass()} gap-2 p-2`}>
+        <div className={`grid ${getGridColumnsClass()} gap-3 p-2`}>
           {weeksGrid.map((yearData) => (
             <div
               key={yearData.year}
-              className={`border rounded-lg p-2 flex flex-col items-center bg-card ${
+              className={`border rounded-lg p-3 flex flex-col items-center bg-card ${
                 yearData.isCurrentYear
                   ? 'border-currentYear ring-2 ring-currentYear/50'
                   : 'border-border'
               }`}
             >
               <div
-                className={`text-sm font-semibold mb-2 ${
+                className={`text-sm font-semibold mb-3 ${
                   yearData.isCurrentYear
                     ? 'text-currentYear'
                     : 'text-muted-foreground'
@@ -197,9 +223,9 @@ const LifeGrid: React.FC<LifeGridProps> = ({
               >
                 {yearData.actualYear}
               </div>
-              <div className="flex flex-col space-y-1">
+              <div className="flex flex-col space-y-2">
                 {yearData.quarters.map((quarter, quarterIndex) => (
-                  <div key={quarterIndex} className="flex space-x-1">
+                  <div key={quarterIndex} className="flex space-x-2">
                     {quarter.map((weekData) => (
                       <div
                         key={weekData.week}
@@ -207,12 +233,14 @@ const LifeGrid: React.FC<LifeGridProps> = ({
                           width: `${boxSize}px`,
                           height: `${boxSize}px`,
                           backgroundColor: weekData.color,
-                          borderRadius: '2px',
+                          borderRadius: '4px',
                           border: '1px solid var(--background)',
                         }}
-                        title={`Week ${weekData.week + 1} of ${
-                          yearData.actualYear
-                        }`}
+                        title={`Week ${weekData.week + 1} (${
+                          weekData.dateRange
+                        })`}
+                        data-week={weekData.week + 1}
+                        data-date-range={weekData.dateRange}
                       />
                     ))}
                   </div>
