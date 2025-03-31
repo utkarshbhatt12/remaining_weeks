@@ -14,9 +14,10 @@ export default defineConfig({
         copyFileSync('public/manifest.json', 'dist/manifest.json');
 
         // Copy icon files to dist folder
-        copyFileSync('public/icon16.png', 'dist/icon16.png');
-        // copyFileSync('public/icon48.png', 'dist/icon48.png');
-        // copyFileSync('public/icon128.png', 'dist/icon128.png');
+        // copyFileSync('public/icons/icon16.png', 'dist/icon16.png');
+        // copyFileSync('public/icons/icon32.png', 'dist/icon32.png');
+        // copyFileSync('public/icons/icon48.png', 'dist/icon48.png');
+        // copyFileSync('public/icons/icon128.png', 'dist/icon128.png');
       },
     },
   ],

@@ -125,12 +125,15 @@ const AddSiteModal: React.FC<AddSiteModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-800 rounded-lg shadow-lg max-w-md w-full">
-        <div className="flex justify-between items-center p-4 border-b border-gray-700">
+      <div className="bg-card rounded-lg shadow-lg max-w-md w-full text-card-foreground">
+        <div className="flex justify-between items-center p-4 border-b border-border">
           <h2 className="text-lg font-bold flex items-center">
             <Plus size={18} className="mr-2" /> Add New Site
           </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white">
+          <button
+            onClick={onClose}
+            className="text-muted-foreground hover:text-foreground"
+          >
             <X size={20} />
           </button>
         </div>
@@ -151,7 +154,7 @@ const AddSiteModal: React.FC<AddSiteModalProps> = ({
                 setNewSiteUrl(e.target.value);
                 setUrlError('');
               }}
-              className="w-full px-4 py-2 rounded-md border border-gray-600 bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full px-4 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               placeholder="e.g., google.com"
               autoFocus
             />
@@ -174,7 +177,7 @@ const AddSiteModal: React.FC<AddSiteModalProps> = ({
                 setNewSiteTitle(e.target.value);
                 setTitleError('');
               }}
-              className="w-full px-4 py-2 rounded-md border border-gray-600 bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full px-4 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               placeholder="e.g., Google"
               maxLength={50}
             />
@@ -187,14 +190,14 @@ const AddSiteModal: React.FC<AddSiteModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-md bg-gray-700 hover:bg-gray-600 transition-colors"
+              className="px-4 py-2 rounded-md bg-muted hover:bg-muted/80 transition-colors text-foreground"
             >
               Cancel
             </button>
             <button
               type="button"
               onClick={handleAddSite}
-              className="px-4 py-2 rounded-md bg-green-600 hover:bg-green-500 transition-colors"
+              className="px-4 py-2 rounded-md bg-primary hover:bg-primary/90 transition-colors text-primary-foreground"
             >
               Add Site
             </button>

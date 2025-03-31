@@ -2,7 +2,8 @@
 
 import type React from 'react';
 import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, Palette } from 'lucide-react';
+import ThemeSelector from './ThemeSelector';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -29,6 +30,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     initialLifeExpectancy.toString(),
   );
   const [error, setError] = useState('');
+  const [activeTab, setActiveTab] = useState<'general' | 'appearance'>(
+    'general',
+  );
 
   useEffect(() => {
     // Reset form when modal opens
@@ -37,6 +41,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
       setBirthDate(initialBirthDate.toISOString().split('T')[0]);
       setLifeExpectancy(initialLifeExpectancy.toString());
       setError('');
+      setActiveTab('general');
     }
   }, [isOpen, initialName, initialBirthDate, initialLifeExpectancy]);
 
@@ -80,92 +85,127 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-800 rounded-lg shadow-lg max-w-md w-full">
-        <div className="flex justify-between items-center p-4 border-b border-gray-700">
+      <div className="bg-card rounded-lg shadow-lg max-w-md w-full text-card-foreground">
+        <div className="flex justify-between items-center p-4 border-b border-border">
           <h2 className="text-xl font-bold">Settings</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white">
+          <button
+            onClick={onClose}
+            className="text-muted-foreground hover:text-foreground"
+          >
             <X size={24} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-4 space-y-4">
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium mb-1">
-              Your Name
-            </label>
-            <input
-              type="text"
-              id="name"
-              value={name}
-              onChange={(e) => {
-                setName(e.target.value);
-                setError('');
-              }}
-              className="w-full px-4 py-2 rounded-md border border-gray-600 bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-green-500"
-              placeholder="Enter your name"
-            />
-          </div>
+        <div className="flex border-b border-border">
+          <button
+            className={`px-4 py-2 font-medium text-sm ${
+              activeTab === 'general'
+                ? 'border-b-2 border-primary text-primary'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+            onClick={() => setActiveTab('general')}
+          >
+            General
+          </button>
+          <button
+            className={`px-4 py-2 font-medium text-sm flex items-center ${
+              activeTab === 'appearance'
+                ? 'border-b-2 border-primary text-primary'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+            onClick={() => setActiveTab('appearance')}
+          >
+            <Palette size={16} className="mr-1" /> Appearance
+          </button>
+        </div>
 
-          <div>
-            <label
-              htmlFor="birthdate"
-              className="block text-sm font-medium mb-1"
-            >
-              Birth Date
-            </label>
-            <input
-              type="date"
-              id="birthdate"
-              value={birthDate}
-              onChange={(e) => {
-                setBirthDate(e.target.value);
-                setError('');
-              }}
-              className="w-full px-4 py-2 rounded-md border border-gray-600 bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-green-500"
-              max={new Date().toISOString().split('T')[0]}
-            />
-          </div>
+        <div className="p-4">
+          {activeTab === 'general' ? (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Your Name
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  value={name}
+                  onChange={(e) => {
+                    setName(e.target.value);
+                    setError('');
+                  }}
+                  className="w-full px-4 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="Enter your name"
+                />
+              </div>
 
-          <div>
-            <label
-              htmlFor="lifeExpectancy"
-              className="block text-sm font-medium mb-1"
-            >
-              Life Expectancy (years)
-            </label>
-            <input
-              type="number"
-              id="lifeExpectancy"
-              value={lifeExpectancy}
-              onChange={(e) => {
-                setLifeExpectancy(e.target.value);
-                setError('');
-              }}
-              className="w-full px-4 py-2 rounded-md border border-gray-600 bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-green-500"
-              min="1"
-              max="150"
-              step="1"
-            />
-          </div>
+              <div>
+                <label
+                  htmlFor="birthdate"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Birth Date
+                </label>
+                <input
+                  type="date"
+                  id="birthdate"
+                  value={birthDate}
+                  onChange={(e) => {
+                    setBirthDate(e.target.value);
+                    setError('');
+                  }}
+                  className="w-full px-4 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  max={new Date().toISOString().split('T')[0]}
+                />
+              </div>
 
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+              <div>
+                <label
+                  htmlFor="lifeExpectancy"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Life Expectancy (years)
+                </label>
+                <input
+                  type="number"
+                  id="lifeExpectancy"
+                  value={lifeExpectancy}
+                  onChange={(e) => {
+                    setLifeExpectancy(e.target.value);
+                    setError('');
+                  }}
+                  className="w-full px-4 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  min="1"
+                  max="150"
+                  step="1"
+                />
+              </div>
 
-          <div className="flex justify-end space-x-2 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 rounded-md bg-gray-700 hover:bg-gray-600 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 rounded-md bg-green-600 hover:bg-green-500 transition-colors"
-            >
-              Save Changes
-            </button>
-          </div>
-        </form>
+              {error && <p className="text-red-500 text-sm">{error}</p>}
+
+              <div className="flex justify-end space-x-2 pt-2">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="px-4 py-2 rounded-md bg-muted hover:bg-muted/80 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground transition-colors"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          ) : (
+            <ThemeSelector />
+          )}
+        </div>
       </div>
     </div>
   );

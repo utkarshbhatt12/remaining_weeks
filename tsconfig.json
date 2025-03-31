@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "lib": ["ES2020", "DOM", "DOM.Iterable", "ES2017"],
     "strict": true,
     "target": "es6",
     "moduleResolution": "bundler",
@@ -11,14 +12,7 @@
     "noEmitOnError": true,
     "jsx": "react-jsx",
     "typeRoots": ["node_modules/@types"],
-    "types": [
-      // Support for: https://www.npmjs.com/package/@types/chrome
-      // Run: `npm install --save @types/chrome`
-      // More info: https://stackoverflow.com/a/40826789/2085356
-      "chrome"
-      // Support for Jest
-      // Run: `npm i --save-dev @types/jest`
-    ]
+    "types": ["chrome"]
   },
   "include": ["src"],
   "references": [{ "path": "./tsconfig.node.json" }]

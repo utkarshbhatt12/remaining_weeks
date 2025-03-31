@@ -3,9 +3,6 @@
 import type React from 'react';
 import { useState } from 'react';
 
-// Declare chrome if it's not available in the environment (e.g., testing)
-declare const chrome: any;
-
 interface BirthdateFormProps {
   onSubmit: (date: Date) => void;
 }
@@ -32,11 +29,13 @@ export default function BirthdateForm({ onSubmit }: BirthdateFormProps) {
     }
 
     // Store name if provided
-    if (name.trim()) {
-      try {
-        chrome.storage.sync.set({ name: name.trim() });
-      } catch (e) {
-        console.warn('Chrome storage not available.', e);
+    if (
+      typeof window !== 'undefined' &&
+      window.chrome &&
+      window.chrome.storage
+    ) {
+      if (name.trim()) {
+        window.chrome.storage.sync.set({ name: name.trim() });
       }
     }
 
@@ -44,11 +43,11 @@ export default function BirthdateForm({ onSubmit }: BirthdateFormProps) {
   };
 
   return (
-    <div className="bg-gray-800 p-8 rounded-lg shadow-lg max-w-md w-full">
+    <div className="bg-card p-8 rounded-lg shadow-lg max-w-md w-full">
       <h2 className="text-2xl font-bold mb-6 text-center">
         Welcome to Life in Weeks
       </h2>
-      <p className="mb-6 text-gray-400">
+      <p className="mb-6 text-muted-foreground">
         To visualize your life in weeks, we need to know when you were born.
         This information is stored locally and never shared.
       </p>
@@ -63,7 +62,7 @@ export default function BirthdateForm({ onSubmit }: BirthdateFormProps) {
             id="name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full px-4 py-2 rounded-md border border-gray-600 bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
+            className="w-full px-4 py-2 rounded-md border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary"
             placeholder="Enter your name"
           />
         </div>
@@ -80,7 +79,7 @@ export default function BirthdateForm({ onSubmit }: BirthdateFormProps) {
               setDate(e.target.value);
               setError('');
             }}
-            className="w-full px-4 py-2 rounded-md border border-gray-600 bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
+            className="w-full px-4 py-2 rounded-md border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary"
             max={new Date().toISOString().split('T')[0]}
           />
           {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
@@ -88,7 +87,7 @@ export default function BirthdateForm({ onSubmit }: BirthdateFormProps) {
 
         <button
           type="submit"
-          className="w-full bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-md transition-colors"
+          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-2 px-4 rounded-md transition-colors"
         >
           Get Started
         </button>

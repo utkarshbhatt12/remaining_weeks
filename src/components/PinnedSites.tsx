@@ -27,7 +27,7 @@ export default function PinnedSites({
 
   if (sites.length === 0 && !editable) {
     return (
-      <div className="text-center py-4 text-gray-400">
+      <div className="text-center py-4 text-muted-foreground">
         No pinned sites available
       </div>
     );
@@ -40,9 +40,9 @@ export default function PinnedSites({
           <div key={index} className="relative group">
             <a
               href={site.url}
-              className="flex flex-col items-center bg-gray-800 p-2 rounded-lg shadow-md hover:bg-gray-700 transition-colors h-full"
+              className="flex flex-col items-center bg-card p-2 rounded-lg shadow-md hover:bg-muted transition-colors h-full"
             >
-              <div className="w-10 h-10 flex items-center justify-center bg-gray-700 rounded-full mb-2">
+              <div className="w-10 h-10 flex items-center justify-center bg-muted rounded-full mb-2">
                 <img
                   src={`https://www.google.com/s2/favicons?domain=${
                     new URL(site.url).hostname
@@ -80,10 +80,10 @@ export default function PinnedSites({
         {editable && onAddSite && (
           <button
             onClick={() => setIsAddSiteModalOpen(true)}
-            className="flex flex-col items-center justify-center bg-gray-800 p-2 rounded-lg shadow-md hover:bg-gray-700 transition-colors border-2 border-dashed border-gray-700 h-full min-h-[80px]"
+            className="flex flex-col items-center justify-center bg-card p-2 rounded-lg shadow-md hover:bg-muted transition-colors border-2 border-dashed border-border h-full min-h-[80px]"
           >
-            <Plus size={24} className="text-gray-400 mb-1" />
-            <span className="text-xs text-gray-400">Add Site</span>
+            <Plus size={24} className="text-muted-foreground mb-1" />
+            <span className="text-xs text-muted-foreground">Add Site</span>
           </button>
         )}
       </div>

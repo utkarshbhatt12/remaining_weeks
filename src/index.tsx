@@ -3,9 +3,15 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
 
-// Force dark mode
-document.documentElement.classList.add('dark');
-document.body.classList.add('dark');
+// Initialize dark mode based on system preference
+const prefersDarkMode =
+  window.matchMedia &&
+  window.matchMedia('(prefers-color-scheme: dark)').matches;
+if (prefersDarkMode) {
+  document.documentElement.classList.add('dark');
+} else {
+  document.documentElement.classList.remove('dark');
+}
 
 // Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', () => {

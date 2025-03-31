@@ -6,6 +6,7 @@ import LifeGrid from './components/LifeGrid';
 import BirthdateForm from './components/BirthdateForm';
 import PinnedSites from './components/PinnedSites';
 import SettingsModal from './components/SettingsModal';
+import { ThemeProvider } from './components/ThemeProvider';
 
 // Define site interface
 interface Site {
@@ -14,7 +15,7 @@ interface Site {
   isCustom?: boolean;
 }
 
-export default function App() {
+function AppContent() {
   const [birthdate, setBirthdate] = useState<Date | null>(null);
   const [name, setName] = useState<string>('');
   const [lifeExpectancy, setLifeExpectancy] = useState<number>(80);
@@ -23,19 +24,29 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [editingSites, setEditingSites] = useState(false);
+  const [weeksRemaining, setWeeksRemaining] = useState<number>(0);
 
   // Combine Chrome sites and custom sites
   const allSites = [...chromeSites, ...customSites];
 
+  // Calculate weeks remaining
   useEffect(() => {
-    console.log('App mounted');
+    if (birthdate) {
+      const today = new Date();
+      const millisecondsPerWeek = 7 * 24 * 60 * 60 * 1000;
+      const weeksLived = Math.floor(
+        (today.getTime() - birthdate.getTime()) / millisecondsPerWeek,
+      );
+      const remaining = Math.max(0, lifeExpectancy * 52 - weeksLived);
+      setWeeksRemaining(remaining);
+    }
+  }, [birthdate, lifeExpectancy]);
 
-    // Load user data from Chrome storage
+  useEffect(() => {
     try {
-      chrome.storage.sync.get(
+      window.chrome?.storage.sync.get(
         ['birthdate', 'name', 'customSites', 'lifeExpectancy'],
         (result) => {
-          console.log('Storage result:', result);
           if (result.birthdate) {
             setBirthdate(new Date(result.birthdate));
           }
@@ -52,31 +63,23 @@ export default function App() {
         },
       );
     } catch (e) {
-      console.warn('Chrome storage not available.', e);
+      console.warn('Error loading data from storage:', e);
       setLoading(false);
     }
 
     // Get top sites
     try {
-      if (chrome.topSites) {
-        chrome.topSites.get((sites) => {
-          console.log('Top sites:', sites);
-          setChromeSites(sites.slice(0, 8)); // Limit to 8 sites
-        });
-      }
+      window.chrome?.topSites.get((sites) => {
+        setChromeSites(sites.slice(0, 8)); // Limit to 8 sites
+      });
     } catch (e) {
-      console.warn('Chrome topSites not available.', e);
+      console.warn('Error loading top sites:', e);
     }
   }, []);
 
   const handleBirthdateSubmit = (date: Date) => {
-    console.log('Birthdate submitted:', date);
     setBirthdate(date);
-    try {
-      chrome.storage.sync.set({ birthdate: date.toISOString() });
-    } catch (e) {
-      console.warn('Chrome storage not available.', e);
-    }
+    window.chrome?.storage.sync.set({ birthdate: date.toISOString() });
   };
 
   const handleSettingsSave = (
@@ -84,24 +87,15 @@ export default function App() {
     newBirthdate: Date,
     newLifeExpectancy: number,
   ) => {
-    console.log('Settings saved:', {
-      newName,
-      newBirthdate,
-      newLifeExpectancy,
-    });
     setName(newName);
     setBirthdate(newBirthdate);
     setLifeExpectancy(newLifeExpectancy);
 
-    try {
-      chrome.storage.sync.set({
-        name: newName,
-        birthdate: newBirthdate.toISOString(),
-        lifeExpectancy: newLifeExpectancy,
-      });
-    } catch (e) {
-      console.warn('Chrome storage not available.', e);
-    }
+    window.chrome?.storage.sync.set({
+      name: newName,
+      birthdate: newBirthdate.toISOString(),
+      lifeExpectancy: newLifeExpectancy,
+    });
   };
 
   const handleRemoveSite = (index: number) => {
@@ -118,11 +112,7 @@ export default function App() {
       setCustomSites(newCustomSites);
 
       // Save to storage
-      try {
-        chrome.storage.sync.set({ customSites: newCustomSites });
-      } catch (e) {
-        console.warn('Chrome storage not available.', e);
-      }
+      window.chrome?.storage.sync.set({ customSites: newCustomSites });
     }
   };
 
@@ -131,23 +121,19 @@ export default function App() {
     setCustomSites(newCustomSites);
 
     // Save to storage
-    try {
-      chrome.storage.sync.set({ customSites: newCustomSites });
-    } catch (e) {
-      console.warn('Chrome storage not available.', e);
-    }
+    window.chrome?.storage.sync.set({ customSites: newCustomSites });
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-900 text-gray-100">
+      <div className="flex items-center justify-center h-screen bg-background text-foreground">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 p-4 px-6">
+    <div className="min-h-screen bg-background text-foreground p-4 px-6">
       <div className="max-w-full mx-auto">
         {!birthdate ? (
           <div className="flex items-center justify-center h-screen">
@@ -158,19 +144,20 @@ export default function App() {
             <header className="flex justify-between items-center">
               <div className="text-center flex-1">
                 <h1 className="text-2xl font-bold mb-1">Life in Weeks</h1>
-                <p className="text-sm text-gray-400">
-                  {name ? `Hello, ${name}! ` : ''}A visual reminder of the time
-                  we have
+                <p className="text-sm text-muted-foreground">
+                  {name
+                    ? `Hey, ${name}, only ${weeksRemaining.toLocaleString()} Sundays remain.`
+                    : `Only ${weeksRemaining.toLocaleString()} Sundays remain.`}
                 </p>
               </div>
               <button
                 onClick={() => setIsSettingsOpen(true)}
-                className="p-2 rounded-full hover:bg-gray-800 transition-colors"
+                className="p-2 rounded-full hover:bg-muted transition-colors"
                 title="Settings"
               >
                 <Settings
                   size={24}
-                  className="text-gray-400 hover:text-white"
+                  className="text-muted-foreground hover:text-foreground"
                 />
               </button>
             </header>
@@ -183,8 +170,8 @@ export default function App() {
                   onClick={() => setEditingSites(!editingSites)}
                   className={`p-1.5 rounded-md transition-colors ${
                     editingSites
-                      ? 'bg-green-600 text-white'
-                      : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                   }`}
                   title={editingSites ? 'Done editing' : 'Edit sites'}
                 >
@@ -218,5 +205,13 @@ export default function App() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
   );
 }

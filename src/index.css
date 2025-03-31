@@ -3,89 +3,163 @@
 @tailwind utilities;
 
 :root {
-  --primary: 20 150 150;
-  --primary-foreground: 255 255 255;
+  /* Default theme variables - will be overridden by ThemeProvider */
+  --background: #f8f9fa;
+  --foreground: #1a1a1a;
+  --primary: #14b8a6;
+  --secondary: #64748b;
+  --accent: #0ea5e9;
+  --muted: #e2e8f0;
+  --border: #cbd5e1;
+  --card: #ffffff;
+  --cardForeground: #1a1a1a;
+  --weekLived: #10b981;
+  --weekRemaining: #94a3b8;
+  --currentYear: #f59e0b;
 }
 
-@layer base {
-  body {
-    @apply bg-gray-900;
-  }
+/* Apply dark theme variables when system prefers dark mode */
+@media (prefers-color-scheme: dark) {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
+    --background: #111827;
+    --foreground: #f8fafc;
+    --primary: #14b8a6;
+    --secondary: #64748b;
+    --accent: #0ea5e9;
+    --muted: #334155;
+    --border: #475569;
+    --card: #1e293b;
+    --cardForeground: #f8fafc;
+    --weekLived: #10b981;
+    --weekRemaining: #64748b;
+    --currentYear: #f59e0b;
   }
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+
+  html {
+    color-scheme: dark;
   }
 }
 
-.bg-primary {
-  background-color: rgb(var(--primary));
+.dark {
+  --background: #111827;
+  --foreground: #f8fafc;
+  --primary: #14b8a6;
+  --secondary: #64748b;
+  --accent: #0ea5e9;
+  --muted: #334155;
+  --border: #475569;
+  --card: #1e293b;
+  --cardForeground: #f8fafc;
+  --weekLived: #10b981;
+  --weekRemaining: #64748b;
+  --currentYear: #f59e0b;
 }
-
-.hover\:bg-primary\/90:hover {
-  background-color: rgb(var(--primary) / 0.9);
-}
-
-.text-primary-foreground {
-  color: rgb(var(--primary-foreground));
-}
-
-
 
 @layer base {
-  * {
-    @apply border-border;
-  }
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Theme utility classes */
+.bg-primary {
+  background-color: var(--primary);
+}
+
+.text-primary {
+  color: var(--primary);
+}
+
+.bg-secondary {
+  background-color: var(--secondary);
+}
+
+.text-secondary {
+  color: var(--secondary);
+}
+
+.bg-accent {
+  background-color: var(--accent);
+}
+
+.text-accent {
+  color: var(--accent);
+}
+
+.bg-muted {
+  background-color: var(--muted);
+}
+
+.text-muted {
+  color: var(--muted);
+}
+
+.border-border {
+  border-color: var(--border);
+}
+
+.bg-card {
+  background-color: var(--card);
+}
+
+.text-card-foreground {
+  color: var(--cardForeground);
+}
+
+.bg-background {
+  background-color: var(--background);
+}
+
+.text-foreground {
+  color: var(--foreground);
+}
+
+.text-primary-foreground {
+  color: var(--background);
+}
+
+/* Week dots classes */
+.bg-weekLived {
+  background-color: var(--weekLived);
+}
+
+.bg-weekRemaining {
+  background-color: var(--weekRemaining);
+}
+
+.text-weekLived {
+  color: var(--weekLived);
+}
+
+.text-weekRemaining {
+  color: var(--weekRemaining);
+}
+
+.text-currentYear {
+  color: var(--currentYear);
+}
+
+.border-currentYear {
+  border-color: var(--currentYear);
+}
+
+.hover\:bg-primary\/90:hover {
+  background-color: color-mix(in srgb, var(--primary) 90%, transparent);
+}
+
+.hover\:bg-muted:hover {
+  background-color: var(--muted);
+}
+
+.hover\:bg-muted\/80:hover {
+  background-color: color-mix(in srgb, var(--muted) 80%, transparent);
+}
+
+.hover\:text-foreground:hover {
+  color: var(--foreground);
+}
+
+.text-muted-foreground {
+  color: color-mix(in srgb, var(--foreground) 60%, transparent);
 }
 

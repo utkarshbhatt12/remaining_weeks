@@ -58,11 +58,11 @@ const LifeGrid: React.FC<LifeGridProps> = ({
         for (let week = 0; week < 13; week++) {
           const currentWeek = year * 52 + quarter * 13 + week;
 
-          let bgColor = 'bg-gray-700';
-
-          if (currentWeek < weeksLived) {
-            bgColor = 'bg-green-600'; // Brighter green for better visibility
-          }
+          // Use inline styles with CSS variables for more reliable coloring
+          const bgColor =
+            currentWeek < weeksLived
+              ? 'var(--weekLived)'
+              : 'var(--weekRemaining)';
 
           quarterWeeks.push({
             week: currentWeek,
@@ -158,19 +158,21 @@ const LifeGrid: React.FC<LifeGridProps> = ({
   };
 
   return (
-    <div className="w-full max-w-full mx-auto bg-gray-900 text-gray-100 rounded-lg shadow-lg px-6">
+    <div className="w-full max-w-full mx-auto bg-card text-card-foreground rounded-lg shadow-lg px-6">
       <div className="space-y-2">
         <div className="flex justify-between px-4 py-2">
           <p className="text-sm">
-            <span className="font-bold text-green-400">{weeksLived}</span> weeks
+            <span className="font-bold text-weekLived">{weeksLived}</span> weeks
             lived
           </p>
           <p className="text-sm">
-            <span className="font-bold text-gray-400">{weeksRemaining}</span>{' '}
+            <span className="font-bold text-weekRemaining">
+              {weeksRemaining}
+            </span>{' '}
             weeks remaining
           </p>
           <p className="text-sm">
-            <span className="font-bold text-yellow-400">
+            <span className="font-bold text-currentYear">
               Current year: {currentYear}
             </span>
           </p>
@@ -180,15 +182,17 @@ const LifeGrid: React.FC<LifeGridProps> = ({
           {weeksGrid.map((yearData) => (
             <div
               key={yearData.year}
-              className={`border rounded-lg p-2 flex flex-col items-center bg-gray-800 ${
+              className={`border rounded-lg p-2 flex flex-col items-center bg-card ${
                 yearData.isCurrentYear
-                  ? 'border-yellow-500 ring-2 ring-yellow-500/50'
-                  : 'border-gray-700'
+                  ? 'border-currentYear ring-2 ring-currentYear/50'
+                  : 'border-border'
               }`}
             >
               <div
                 className={`text-sm font-semibold mb-2 ${
-                  yearData.isCurrentYear ? 'text-yellow-400' : 'text-gray-300'
+                  yearData.isCurrentYear
+                    ? 'text-currentYear'
+                    : 'text-muted-foreground'
                 }`}
               >
                 {yearData.actualYear}
@@ -199,10 +203,12 @@ const LifeGrid: React.FC<LifeGridProps> = ({
                     {quarter.map((weekData) => (
                       <div
                         key={weekData.week}
-                        className={`${weekData.color} border border-gray-900 rounded-sm`}
                         style={{
                           width: `${boxSize}px`,
                           height: `${boxSize}px`,
+                          backgroundColor: weekData.color,
+                          borderRadius: '2px',
+                          border: '1px solid var(--background)',
                         }}
                         title={`Week ${weekData.week + 1} of ${
                           yearData.actualYear
@@ -216,7 +222,7 @@ const LifeGrid: React.FC<LifeGridProps> = ({
           ))}
         </div>
 
-        <div className="text-xs text-gray-400 text-center px-2 pb-2">
+        <div className="text-xs text-muted-foreground text-center px-2 pb-2">
           Each box represents one week of your life (based on {lifeExpectancy}
           -year expectancy)
         </div>

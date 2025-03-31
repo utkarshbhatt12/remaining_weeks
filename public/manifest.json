@@ -4,11 +4,14 @@
   "description": "A chrome extension to show remaining weeks in your life",
   "version": "1.0.0",
   "icons": {
-    "16": "icon16.png"
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
   },
   "action": {
     "default_icon": {
-      "16": "icon16.png"
+      "32": "icons/icon32.png"
     }
   },
   "permissions": [
