@@ -1,11 +1,18 @@
-import React, { useState } from 'react';
+'use client';
+
+import type React from 'react';
+import { useState } from 'react';
+
+// Declare chrome if it's not available in the environment (e.g., testing)
+declare const chrome: any;
 
 interface BirthdateFormProps {
   onSubmit: (date: Date) => void;
 }
 
 export default function BirthdateForm({ onSubmit }: BirthdateFormProps) {
-  const [date, setDate] = useState('2000-01-01');
+  const [date, setDate] = useState('');
+  const [name, setName] = useState('');
   const [error, setError] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -24,6 +31,15 @@ export default function BirthdateForm({ onSubmit }: BirthdateFormProps) {
       return;
     }
 
+    // Store name if provided
+    if (name.trim()) {
+      try {
+        chrome.storage.sync.set({ name: name.trim() });
+      } catch (e) {
+        console.warn('Chrome storage not available.', e);
+      }
+    }
+
     onSubmit(birthDate);
   };
 
@@ -38,6 +54,20 @@ export default function BirthdateForm({ onSubmit }: BirthdateFormProps) {
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="name" className="block text-sm font-medium mb-1">
+            Your Name (optional)
+          </label>
+          <input
+            type="text"
+            id="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full px-4 py-2 rounded-md border border-gray-600 bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
+            placeholder="Enter your name"
+          />
+        </div>
+
         <div>
           <label htmlFor="birthdate" className="block text-sm font-medium mb-1">
             Your birth date
