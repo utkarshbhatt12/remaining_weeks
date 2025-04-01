@@ -2,6 +2,10 @@
 
 A Chrome extension which shows the remaining weeks in your life.
 
+## Link
+
+[https://v0.dev/chat/chrome-extension-project-J2aol8shTc](https://v0.dev/chat/chrome-extension-project-J2aol8shTcd)
+
 ## Category
 
 Workflow & Planning
@@ -33,7 +37,6 @@ zip -r dist.zip *
 8. **Quotes or Affirmations** - Display motivational quotes that change daily
 9. **Multiple Profiles** - Support for multiple users on the same browser
 10. **Export/Import Settings** - Allow users to backup and restore their configuration
-
 
 ### User Experience Enhancements
 
@@ -69,5 +72,3 @@ zip -r dist.zip *
 30. **High Contrast Mode** - Add a high contrast visual option
 31. **Keyboard Navigation** - Improve keyboard-only navigation throughout the extension
 32. **Font Size Controls** - Allow users to adjust text size independently of browser settings
-
-Would you like me to elaborate on any of these suggestions or discuss which ones might be most valuable to implement first?
