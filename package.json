@@ -1,6 +1,6 @@
 {
   "name": "remaining-weeks",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "A chrome extension to show remaining weeks in your life",
   "private": true,
   "type": "module",
