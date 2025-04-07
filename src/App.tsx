@@ -1,14 +1,14 @@
 'use client';
 
+import { Edit, Settings } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Settings, Edit } from 'lucide-react';
-import LifeGrid from './components/LifeGrid';
+
 import BirthdateForm from './components/BirthdateForm';
+import LifeGrid from './components/LifeGrid';
 import PinnedSites from './components/PinnedSites';
 import SettingsModal from './components/SettingsModal';
 import { ThemeProvider } from './components/ThemeProvider';
 
-// Define site interface
 interface Site {
   url: string;
   title: string;

@@ -1,9 +1,10 @@
 'use client';
 
+import { Check } from 'lucide-react';
 import type React from 'react';
+
 import { themes } from '../types/theme';
 import { useTheme } from './ThemeProvider';
-import { Check } from 'lucide-react';
 
 interface ThemeSelectorProps {
   onClose?: () => void;

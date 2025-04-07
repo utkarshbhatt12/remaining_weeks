@@ -1,8 +1,8 @@
 'use client';
 
+import { Plus, X } from 'lucide-react';
 import type React from 'react';
-import { useState, useEffect } from 'react';
-import { X, Plus } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface Site {
   url: string;

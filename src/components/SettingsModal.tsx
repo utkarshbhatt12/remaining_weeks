@@ -1,8 +1,9 @@
 'use client';
 
+import { Palette, X } from 'lucide-react';
 import type React from 'react';
-import { useState, useEffect } from 'react';
-import { X, Palette } from 'lucide-react';
+import { useEffect, useState } from 'react';
+
 import ThemeSelector from './ThemeSelector';
 
 interface SettingsModalProps {

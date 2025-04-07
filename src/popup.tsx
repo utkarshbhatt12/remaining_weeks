@@ -1,7 +1,7 @@
 import React from 'react';
 
-const popup = () => {
-  return <></>;
+const Popup = () => {
+  return null;
 };
 
-export default popup;
+export default Popup;

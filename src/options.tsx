@@ -1,7 +1,7 @@
 import React from 'react';
 
-const options = () => {
+const Options = () => {
   return <></>;
 };
 
-export default options;
+export default Options;
