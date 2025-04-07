@@ -1,7 +1,7 @@
 'use client';
 
 import type React from 'react';
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
 
 interface LifeGridProps {
   birthDate: Date;
@@ -12,9 +12,8 @@ const LifeGrid: React.FC<LifeGridProps> = ({
   birthDate,
   lifeExpectancy = 80,
 }) => {
-  // State to track available space - increased default size from 12 to 18
-  const [boxSize, setBoxSize] = useState(18);
-  const [columnsPerRow, setColumnsPerRow] = useState(10);
+  // State to track available space - reduced default size from 18 to 12
+  const [boxSize, setBoxSize] = useState(12);
 
   // Calculate weeks lived and remaining
   const calculateWeeks = () => {
@@ -53,49 +52,48 @@ const LifeGrid: React.FC<LifeGridProps> = ({
 
   // Generate weeks grid
   const generateWeeksGrid = () => {
-    const { weeksLived, currentYear } = calculateWeeks();
+    const { weeksLived } = calculateWeeks();
     const totalWeeks = lifeExpectancy * 52;
-    const birthYear = birthDate.getFullYear();
 
     const grid = [];
     for (let year = 0; year < lifeExpectancy; year++) {
-      const actualYear = birthYear + year;
-      const isCurrentYear = actualYear === currentYear;
+      const actualYear = birthDate.getFullYear() + year;
+      const isCurrentYear = actualYear === new Date().getFullYear();
 
       const yearData = {
         year: year + 1,
         actualYear,
         isCurrentYear,
-        quarters: [],
+        weeks: [],
       } as {
         year: number;
         actualYear: number;
         isCurrentYear: boolean;
-        quarters: { week: number; color: string; dateRange: string }[][];
+        weeks: { week: number; color: string; dateRange: string }[];
       };
 
-      // Create 4 quarters, each with 13 weeks
-      for (let quarter = 0; quarter < 4; quarter++) {
-        const quarterWeeks = [];
-        for (let week = 0; week < 13; week++) {
-          const currentWeek = year * 52 + quarter * 13 + week;
+      for (let week = 0; week < 52; week++) {
+        const currentWeek = year * 52 + week;
 
-          // Use inline styles with CSS variables for more reliable coloring
+        if (currentWeek >= totalWeeks) {
+          yearData.weeks.push({
+            week: currentWeek,
+            color: 'transparent',
+            dateRange: '',
+          });
+        } else {
           const bgColor =
             currentWeek < weeksLived
               ? 'var(--weekLived)'
               : 'var(--weekRemaining)';
-
-          // Get date range for this week
           const dateRange = getWeekDateRange(currentWeek);
 
-          quarterWeeks.push({
+          yearData.weeks.push({
             week: currentWeek,
             color: bgColor,
             dateRange: dateRange,
           });
         }
-        yearData.quarters.push(quarterWeeks);
       }
 
       grid.push(yearData);
@@ -104,84 +102,8 @@ const LifeGrid: React.FC<LifeGridProps> = ({
     return grid;
   };
 
-  // Adjust layout based on screen size
-  useEffect(() => {
-    const handleResize = () => {
-      // Determine optimal box size and columns based on screen size
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-
-      // Calculate how many years we can fit horizontally and vertically
-      // with some padding for other UI elements
-      const availableHeight = height - 200; // Subtract space for header, stats, etc.
-      const availableWidth = width - 80; // Increased padding from 40 to 80
-
-      // Each year needs space for 4 rows of weeks plus padding and year label
-      const yearHeight = 4 * boxSize + 40; // 4 rows + padding + label
-      const yearWidth = 13 * boxSize + 30; // 13 columns + padding
-
-      // Calculate how many years we can fit per row
-      const yearsPerRow = Math.floor(availableWidth / yearWidth);
-
-      // Calculate how many rows of years we can fit
-      const maxYearRows = Math.floor(availableHeight / yearHeight);
-
-      // Total years we can display
-      const totalYearsVisible = yearsPerRow * maxYearRows;
-
-      // If we can't fit all years, adjust the box size
-      if (totalYearsVisible < lifeExpectancy) {
-        // Calculate new box size to fit all years
-        // Set minimum box size to 12 (increased from 8) to ensure dots are visible
-        const newBoxSize = Math.max(
-          12,
-          Math.floor(
-            Math.min(
-              availableWidth / (13 * Math.ceil(lifeExpectancy / maxYearRows)),
-              availableHeight / (4 * maxYearRows),
-            ),
-          ),
-        );
-
-        setBoxSize(newBoxSize);
-      }
-
-      // Set columns per row based on screen width
-      if (width < 640) setColumnsPerRow(1);
-      else if (width < 768) setColumnsPerRow(2);
-      else if (width < 1024) setColumnsPerRow(3);
-      else if (width < 1280) setColumnsPerRow(4);
-      else if (width < 1536) setColumnsPerRow(5);
-      else setColumnsPerRow(6);
-    };
-
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [lifeExpectancy, boxSize]);
-
   const weeksGrid = useMemo(generateWeeksGrid, [birthDate, lifeExpectancy]);
   const { weeksLived, weeksRemaining, currentYear } = calculateWeeks();
-
-  // Get the appropriate grid columns class based on columnsPerRow
-  const getGridColumnsClass = () => {
-    switch (columnsPerRow) {
-      case 1:
-        return 'grid-cols-1';
-      case 2:
-        return 'grid-cols-2';
-      case 3:
-        return 'grid-cols-3';
-      case 4:
-        return 'grid-cols-4';
-      case 5:
-        return 'grid-cols-5';
-      case 6:
-        return 'grid-cols-6';
-      default:
-        return 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6';
-    }
-  };
 
   return (
     <div className="w-full max-w-full mx-auto bg-card text-card-foreground rounded-lg shadow-lg px-6">
@@ -204,11 +126,12 @@ const LifeGrid: React.FC<LifeGridProps> = ({
           </p>
         </div>
 
-        <div className={`grid ${getGridColumnsClass()} gap-3 p-2`}>
+        {/* Use Tailwind's responsive grid classes */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 p-2">
           {weeksGrid.map((yearData) => (
             <div
               key={yearData.year}
-              className={`border rounded-lg p-3 flex flex-col items-center bg-card ${
+              className={`border rounded-lg p-3 flex flex-col items-center bg-card overflow-hidden ${
                 yearData.isCurrentYear
                   ? 'border-currentYear ring-2 ring-currentYear/50'
                   : 'border-border'
@@ -223,27 +146,28 @@ const LifeGrid: React.FC<LifeGridProps> = ({
               >
                 {yearData.actualYear}
               </div>
-              <div className="flex flex-col space-y-2">
-                {yearData.quarters.map((quarter, quarterIndex) => (
-                  <div key={quarterIndex} className="flex space-x-2">
-                    {quarter.map((weekData) => (
-                      <div
-                        key={weekData.week}
-                        style={{
-                          width: `${boxSize}px`,
-                          height: `${boxSize}px`,
-                          backgroundColor: weekData.color,
-                          borderRadius: '4px',
-                          border: '1px solid var(--background)',
-                        }}
-                        title={`Week ${weekData.week + 1} (${
-                          weekData.dateRange
-                        })`}
-                        data-week={weekData.week + 1}
-                        data-date-range={weekData.dateRange}
-                      />
-                    ))}
-                  </div>
+              {/* Correct grid layout */}
+              <div
+                className="grid gap-1"
+                style={{
+                  gridTemplateColumns: 'repeat(13, 1fr)', // 13 columns
+                  gridTemplateRows: 'repeat(4, 1fr)', // 4 rows
+                }}
+              >
+                {yearData.weeks.map((weekData) => (
+                  <div
+                    key={weekData.week}
+                    style={{
+                      width: `${boxSize}px`,
+                      height: `${boxSize}px`,
+                      backgroundColor: weekData.color,
+                      borderRadius: '50%', // Make dots circular
+                      border: '1px solid var(--background)',
+                    }}
+                    title={`Week ${weekData.week + 1} (${weekData.dateRange})`}
+                    data-week={weekData.week + 1}
+                    data-date-range={weekData.dateRange}
+                  />
                 ))}
               </div>
             </div>
