@@ -4,12 +4,7 @@ import { Plus, X } from 'lucide-react';
 import { useState } from 'react';
 
 import AddSiteModal from './AddSiteModal';
-
-interface Site {
-  url: string;
-  title: string;
-  isCustom?: boolean;
-}
+import { Site } from '../types';
 
 interface PinnedSitesProps {
   sites: Site[];

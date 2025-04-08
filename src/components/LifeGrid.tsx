@@ -12,9 +12,6 @@ const LifeGrid: React.FC<LifeGridProps> = ({
   birthDate,
   lifeExpectancy = 80,
 }) => {
-  // State to track available space - reduced default size from 18 to 12
-  const [boxSize, setBoxSize] = useState(12);
-
   // Calculate weeks lived and remaining
   const calculateWeeks = () => {
     const today = new Date();
@@ -50,7 +47,6 @@ const LifeGrid: React.FC<LifeGridProps> = ({
     return `${formatDate(weekStartDate)} - ${formatDate(weekEndDate)}`;
   };
 
-  // Generate weeks grid
   const generateWeeksGrid = () => {
     const { weeksLived } = calculateWeeks();
     const totalWeeks = lifeExpectancy * 52;
@@ -117,7 +113,7 @@ const LifeGrid: React.FC<LifeGridProps> = ({
             <span className="font-bold text-weekRemaining">
               {weeksRemaining}
             </span>{' '}
-            weeks remaining
+            {weeksRemaining === 1 ? 'week' : 'weeks'} remaining
           </p>
           <p className="text-sm">
             <span className="font-bold text-currentYear">
@@ -126,7 +122,6 @@ const LifeGrid: React.FC<LifeGridProps> = ({
           </p>
         </div>
 
-        {/* Use Tailwind's responsive grid classes */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 p-2">
           {weeksGrid.map((yearData) => (
             <div
@@ -146,7 +141,6 @@ const LifeGrid: React.FC<LifeGridProps> = ({
               >
                 {yearData.actualYear}
               </div>
-              {/* Correct grid layout */}
               <div
                 className="grid gap-1"
                 style={{
@@ -158,10 +152,9 @@ const LifeGrid: React.FC<LifeGridProps> = ({
                   <div
                     key={weekData.week}
                     style={{
-                      width: `${boxSize}px`,
-                      height: `${boxSize}px`,
+                      width: '12px',
+                      height: '12px',
                       backgroundColor: weekData.color,
-                      borderRadius: '50%', // Make dots circular
                       border: '1px solid var(--background)',
                     }}
                     title={`Week ${weekData.week + 1} (${weekData.dateRange})`}

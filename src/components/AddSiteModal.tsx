@@ -3,12 +3,7 @@
 import { Plus, X } from 'lucide-react';
 import type React from 'react';
 import { useEffect, useState } from 'react';
-
-interface Site {
-  url: string;
-  title: string;
-  isCustom?: boolean;
-}
+import { Site } from '../types';
 
 interface AddSiteModalProps {
   isOpen: boolean;
@@ -27,7 +22,6 @@ const AddSiteModal: React.FC<AddSiteModalProps> = ({
   const [titleError, setTitleError] = useState('');
 
   useEffect(() => {
-    // Reset form when modal opens
     if (isOpen) {
       setNewSiteUrl('');
       setNewSiteTitle('');
