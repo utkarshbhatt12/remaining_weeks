@@ -1,7 +1,7 @@
 'use client';
 
 import { Plus, X } from 'lucide-react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 import AddSiteModal from './AddSiteModal';
 import { Site } from '../types';

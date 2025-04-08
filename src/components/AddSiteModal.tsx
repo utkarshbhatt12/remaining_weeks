@@ -63,7 +63,7 @@ const AddSiteModal: React.FC<AddSiteModalProps> = ({
         return false;
       }
       return true;
-    } catch (e) {
+    } catch {
       setUrlError('Please enter a valid URL (e.g., google.com)');
       return false;
     }
@@ -110,7 +110,7 @@ const AddSiteModal: React.FC<AddSiteModalProps> = ({
 
       onAddSite({ url, title, isCustom: true });
       onClose();
-    } catch (e) {
+    } catch {
       setUrlError('Invalid URL format. Please check your input.');
     }
   };

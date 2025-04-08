@@ -1,7 +1,7 @@
 'use client';
 
 import type React from 'react';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 
 interface LifeGridProps {
   birthDate: Date;

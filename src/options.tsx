@@ -1,7 +1,5 @@
-import React from 'react';
-
 const Options = () => {
-  return <></>;
+  return null;
 };
 
 export default Options;

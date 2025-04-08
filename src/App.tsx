@@ -1,7 +1,7 @@
 'use client';
 
 import { Edit, Settings } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import BirthdateForm from './components/BirthdateForm';
 import LifeGrid from './components/LifeGrid';
