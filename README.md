@@ -1,6 +1,9 @@
 # Remaining Weeks
 
-A Chrome extension which shows the remaining weeks in your life.
+A Chrome extension that shows the remaining weeks in your life.
+
+<img width="1510" height="821" alt="Screenshot 2025-08-11 at 10 15 41 AM" src="https://github.com/user-attachments/assets/001a07e6-0607-4c3b-aac7-7925adb6136c" />
+
 
 ## Link
 
@@ -22,18 +25,18 @@ zip -r dist.zip *
 
 ## Potential Enhancements for the Life in Weeks Extension
 
-### Visualization Improvements
+### Visualisation Improvements
 
-1. **Alternative Visualization Modes** - Add options to view life in months, days, or years alongside the current weeks view
-2. **Milestone Markers** - Allow users to add and visualize important life events/milestones on the timeline
-3. **Color Customization** - Let users choose different color schemes for past/future weeks
+1. **Alternative Visualisation Modes** - Add options to view life in months, days, or years alongside the current week's view
+2. **Milestone Markers** - Allow users to add and visualise important life events/milestones on the timeline
+3. **Colour Customisation** - Let users choose different colour schemes for past/future weeks
 4. **Hover Details** - Show specific dates when hovering over individual week boxes
-5. **Animation Option** - Add subtle animations when the grid loads to emphasize the passage of time
+5. **Animation Option** - Add subtle animations when the grid loads to emphasise the passage of time
 
-### Personalization Features
+### Personalisation Features
 
 6. **Goals & Achievements** - Let users set and track life goals with specific timeframes
-7. **Custom Categories** - Allow users to categorize weeks (work, education, travel, etc.) with different colors
+7. **Custom Categories** - Allow users to categorise weeks (work, education, travel, etc.) with different colours
 8. **Quotes or Affirmations** - Display motivational quotes that change daily
 9. **Multiple Profiles** - Support for multiple users on the same browser
 10. **Export/Import Settings** - Allow users to backup and restore their configuration
@@ -49,11 +52,11 @@ zip -r dist.zip *
 
 ### Technical Improvements
 
-16. **Offline Support** - Ensure the extension works properly without internet connection
-17. **Performance Optimization** - Improve rendering for users with very long life expectancies
+16. **Offline Support** - Ensure the extension works properly without an internet connection
+17. **Performance Optimisation** - Improve rendering for users with very long life expectancies
 18. **Browser Sync** - Sync settings across different devices using the same browser account
 19. **Data Export** - Allow exporting life data as CSV/JSON for external use
-20. **Backup Reminders** - Remind users to backup their settings periodically
+20. **Backup Reminders** - Remind users to back up their settings periodically
 
 ### Advanced Features
 
