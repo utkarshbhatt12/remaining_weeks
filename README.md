@@ -4,6 +4,10 @@ A Chrome extension that shows the remaining weeks in your life.
 
 <img width="1510" height="821" alt="Screenshot 2025-08-11 at 10 15 41 AM" src="https://github.com/user-attachments/assets/001a07e6-0607-4c3b-aac7-7925adb6136c" />
 
+## Download
+
+[Chrome Web Store: Remaining Weeks](https://chromewebstore.google.com/detail/remaining-weeks/ljjanpoinjfiachpkjmlgccpildgnhhn)
+
 ## Category
 
 Workflow & Planning
