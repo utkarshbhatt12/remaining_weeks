@@ -15,13 +15,17 @@ export default function App() {
   const [name, setName] = useState<string>('');
   const [lifeExpectancy, setLifeExpectancy] = useState<number>(80);
   const [chromeSites, setChromeSites] = useState<Site[]>([]);
+  const [hiddenChromeSites, setHiddenChromeSites] = useState<string[]>([]);
   const [customSites, setCustomSites] = useState<Site[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [editingSites, setEditingSites] = useState(false);
   const [weeksRemaining, setWeeksRemaining] = useState<number>(0);
 
-  const allSites = [...chromeSites, ...customSites];
+  const visibleChromeSites = chromeSites.filter(
+    (site) => !hiddenChromeSites.includes(site.url)
+  );
+  const allSites = [...visibleChromeSites, ...customSites];
 
   useEffect(() => {
     if (!birthdate) {
@@ -41,7 +45,7 @@ export default function App() {
   useEffect(() => {
     try {
       window.chrome.storage.sync.get(
-        ['birthdate', 'name', 'customSites', 'lifeExpectancy'],
+        ['birthdate', 'name', 'customSites', 'lifeExpectancy', 'hiddenChromeSites'],
         (result) => {
           if (result.birthdate) {
             setBirthdate(new Date(result.birthdate));
@@ -55,35 +59,33 @@ export default function App() {
           if (result.lifeExpectancy) {
             setLifeExpectancy(result.lifeExpectancy);
           }
+          if (result.hiddenChromeSites) {
+            setHiddenChromeSites(result.hiddenChromeSites);
+          }
           setLoading(false);
         },
       );
 
       window.chrome.topSites.get((sites) => {
         setChromeSites(
-          sites.slice(0, 8).map((site) => {
-            return {
-              url: site.url,
-              title: site.title,
-              isCustom: false,
-            };
-          }),
+          sites.slice(0, 8).map((site) => ({
+            url: site.url,
+            title: site.title,
+            isCustom: false,
+          })),
         );
       });
     } catch (e) {
-      console.error('Failed to load data from Chrome storage:', e); // Improved error message
-
+      console.error('Failed to load data from Chrome storage:', e);
       setLoading(false);
     }
   }, []);
 
   const handleBirthdateSubmit = (date: Date) => {
     setBirthdate(date);
-
     window.chrome.storage.sync.set({ birthdate: date.toISOString() });
   };
 
-  // Added basic toast notification for saving settings
   const handleSettingsSave = (
     newName: string,
     newBirthdate: Date,
@@ -101,19 +103,17 @@ export default function App() {
   };
 
   const handleRemoveSite = (index: number) => {
-    const isChromeSite = index < chromeSites.length;
-    const updatedSites = isChromeSite
-      ? [...chromeSites.slice(0, index), ...chromeSites.slice(index + 1)]
-      : [
-          ...customSites.slice(0, index - chromeSites.length),
-          ...customSites.slice(index - chromeSites.length + 1),
-        ];
+    const isChromeSite = index < visibleChromeSites.length;
 
     if (isChromeSite) {
-      setChromeSites(updatedSites);
+      const siteUrl = visibleChromeSites[index].url;
+      const newHidden = [...hiddenChromeSites, siteUrl];
+      setHiddenChromeSites(newHidden);
+      window.chrome.storage.sync.set({ hiddenChromeSites: newHidden });
     } else {
+      const customIndex = index - visibleChromeSites.length;
+      const updatedSites = customSites.filter((_, i) => i !== customIndex);
       setCustomSites(updatedSites);
-
       window.chrome.storage.sync.set({ customSites: updatedSites });
     }
   };
@@ -121,7 +121,6 @@ export default function App() {
   const handleAddSite = (site: Site) => {
     const newCustomSites = [...customSites, site];
     setCustomSites(newCustomSites);
-
     window.chrome.storage.sync.set({ customSites: newCustomSites });
   };
 
@@ -164,7 +163,6 @@ export default function App() {
                 </button>
               </header>
 
-              {/* Pinned Sites at the top */}
               <div>
                 <div className="flex justify-between items-center mb-3">
                   <h2 className="text-lg font-semibold">Your Favorite Sites</h2>
@@ -188,7 +186,6 @@ export default function App() {
                 />
               </div>
 
-              {/* LifeGrid below */}
               <div className="mt-6">
                 <h2 className="text-lg font-semibold mb-3">
                   Your Life in Weeks
@@ -199,7 +196,6 @@ export default function App() {
                 />
               </div>
 
-              {/* Settings Modal */}
               <SettingsModal
                 isOpen={isSettingsOpen}
                 onClose={() => setIsSettingsOpen(false)}
