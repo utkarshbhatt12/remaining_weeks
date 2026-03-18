@@ -1,7 +1,7 @@
 'use client';
 
 import { Edit, Settings } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import BirthdateForm from './components/BirthdateForm';
 import LifeGrid from './components/LifeGrid';
@@ -10,7 +10,8 @@ import SettingsModal from './components/SettingsModal';
 import { ThemeProvider } from './components/ThemeProvider';
 import { Site } from './types';
 
-const MAX_HIDDEN_SITES = 10;
+const TOP_SITES_LIMIT = 10;
+const VISIBLE_SITES_LIMIT = 8;
 
 export default function App() {
   const [birthdate, setBirthdate] = useState<Date | null>(null);
@@ -24,10 +25,12 @@ export default function App() {
   const [editingSites, setEditingSites] = useState(false);
   const [weeksRemaining, setWeeksRemaining] = useState<number>(0);
 
+  const isInitialMount = useRef(true);
+
   const visibleChromeSites = chromeSites.filter(
     (site) => !hiddenChromeSites.includes(site.url)
   );
-  const allSites = [...visibleChromeSites.slice(0, 8), ...customSites];
+  const allSites = [...visibleChromeSites.slice(0, VISIBLE_SITES_LIMIT), ...customSites];
 
   useEffect(() => {
     if (!birthdate) {
@@ -45,52 +48,84 @@ export default function App() {
   }, [birthdate, lifeExpectancy]);
 
   useEffect(() => {
-    try {
-      window.chrome.storage.sync.get(
-        ['birthdate', 'name', 'customSites', 'lifeExpectancy', 'hiddenChromeSites'],
-        (result) => {
-          if (result.birthdate) {
-            setBirthdate(new Date(result.birthdate));
-          }
-          if (result.name) {
-            setName(result.name);
-          }
-          if (result.customSites) {
-            setCustomSites(result.customSites);
-          }
-          if (result.lifeExpectancy) {
-            setLifeExpectancy(result.lifeExpectancy);
-          }
-          if (result.hiddenChromeSites) {
-            setHiddenChromeSites(result.hiddenChromeSites);
-          }
-          setLoading(false);
-        },
-      );
+    const loadData = async () => {
+      try {
+        // Load storage data first
+        const storageData = await new Promise<{
+          birthdate?: string;
+          name?: string;
+          customSites?: Site[];
+          lifeExpectancy?: number;
+          hiddenChromeSites?: string[];
+        }>((resolve) => {
+          window.chrome.storage.sync.get(
+            ['birthdate', 'name', 'customSites', 'lifeExpectancy', 'hiddenChromeSites'],
+            resolve,
+          );
+        });
 
-      window.chrome.topSites.get((sites) => {
-        const topSites = sites.slice(0, 10).map((site) => ({
+        // Load top sites
+        const topSitesData = await new Promise<chrome.topSites.MostVisitedURL[]>((resolve) => {
+          window.chrome.topSites.get(resolve);
+        });
+
+        const topSites = topSitesData.slice(0, TOP_SITES_LIMIT).map((site) => ({
           url: site.url,
           title: site.title,
           isCustom: false,
         }));
-        setChromeSites(topSites);
 
         // Prune hidden sites to only include URLs still in current topSites
-        setHiddenChromeSites((prev) => {
-          const topSiteUrls = new Set(topSites.map((s) => s.url));
-          const pruned = prev.filter((url) => topSiteUrls.has(url));
-          if (pruned.length !== prev.length) {
-            window.chrome.storage.sync.set({ hiddenChromeSites: pruned });
-          }
-          return pruned;
-        });
-      });
-    } catch (e) {
-      console.error('Failed to load data from Chrome storage:', e);
-      setLoading(false);
-    }
+        const topSiteUrls = new Set(topSites.map((s) => s.url));
+        const storedHidden = storageData.hiddenChromeSites ?? [];
+        const prunedHidden = storedHidden.filter((url) => topSiteUrls.has(url));
+
+        // Persist pruned list if it changed
+        if (prunedHidden.length !== storedHidden.length) {
+          window.chrome.storage.sync.set({ hiddenChromeSites: prunedHidden });
+        }
+
+        // Set all state
+        if (storageData.birthdate) {
+          setBirthdate(new Date(storageData.birthdate));
+        }
+        if (storageData.name) {
+          setName(storageData.name);
+        }
+        if (storageData.customSites) {
+          setCustomSites(storageData.customSites);
+        }
+        if (storageData.lifeExpectancy) {
+          setLifeExpectancy(storageData.lifeExpectancy);
+        }
+        setHiddenChromeSites(prunedHidden);
+        setChromeSites(topSites);
+        setLoading(false);
+      } catch (e) {
+        console.error('Failed to load data from Chrome storage:', e);
+        setLoading(false);
+      }
+    };
+
+    loadData();
   }, []);
+
+  // Persist hiddenChromeSites changes (skip initial mount)
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    window.chrome.storage.sync.set({ hiddenChromeSites });
+  }, [hiddenChromeSites]);
+
+  // Persist customSites changes
+  useEffect(() => {
+    if (isInitialMount.current) {
+      return;
+    }
+    window.chrome.storage.sync.set({ customSites });
+  }, [customSites]);
 
   const handleBirthdateSubmit = (date: Date) => {
     setBirthdate(date);
@@ -116,35 +151,26 @@ export default function App() {
   const handleRemoveSite = (index: number) => {
     const visibleChrome = chromeSites
       .filter((site) => !hiddenChromeSites.includes(site.url))
-      .slice(0, 8);
+      .slice(0, VISIBLE_SITES_LIMIT);
     const isChromeSite = index < visibleChrome.length;
 
     if (isChromeSite) {
       const siteUrl = visibleChrome[index].url;
-      setHiddenChromeSites((prev) => {
-        if (prev.includes(siteUrl)) {
-          return prev; // Already hidden, no-op
-        }
-        const newHidden = [...prev, siteUrl].slice(-MAX_HIDDEN_SITES);
-        window.chrome.storage.sync.set({ hiddenChromeSites: newHidden });
-        return newHidden;
-      });
+      if (hiddenChromeSites.includes(siteUrl)) {
+        return; // Already hidden, no-op
+      }
+      const newHidden = [...hiddenChromeSites, siteUrl].slice(-TOP_SITES_LIMIT);
+      setHiddenChromeSites(newHidden);
     } else {
       const customIndex = index - visibleChrome.length;
-      setCustomSites((prev) => {
-        const updatedSites = prev.filter((_, i) => i !== customIndex);
-        window.chrome.storage.sync.set({ customSites: updatedSites });
-        return updatedSites;
-      });
+      const updatedSites = customSites.filter((_, i) => i !== customIndex);
+      setCustomSites(updatedSites);
     }
   };
 
   const handleAddSite = (site: Site) => {
-    setCustomSites((prev) => {
-      const newCustomSites = [...prev, site];
-      window.chrome.storage.sync.set({ customSites: newCustomSites });
-      return newCustomSites;
-    });
+    const newCustomSites = [...customSites, site];
+    setCustomSites(newCustomSites);
   };
 
   if (loading) {
