@@ -10,6 +10,8 @@ import SettingsModal from './components/SettingsModal';
 import { ThemeProvider } from './components/ThemeProvider';
 import { Site } from './types';
 
+const MAX_HIDDEN_SITES = 10;
+
 export default function App() {
   const [birthdate, setBirthdate] = useState<Date | null>(null);
   const [name, setName] = useState<string>('');
@@ -25,7 +27,7 @@ export default function App() {
   const visibleChromeSites = chromeSites.filter(
     (site) => !hiddenChromeSites.includes(site.url)
   );
-  const allSites = [...visibleChromeSites, ...customSites];
+  const allSites = [...visibleChromeSites.slice(0, 8), ...customSites];
 
   useEffect(() => {
     if (!birthdate) {
@@ -67,13 +69,22 @@ export default function App() {
       );
 
       window.chrome.topSites.get((sites) => {
-        setChromeSites(
-          sites.slice(0, 8).map((site) => ({
-            url: site.url,
-            title: site.title,
-            isCustom: false,
-          })),
-        );
+        const topSites = sites.slice(0, 10).map((site) => ({
+          url: site.url,
+          title: site.title,
+          isCustom: false,
+        }));
+        setChromeSites(topSites);
+
+        // Prune hidden sites to only include URLs still in current topSites
+        setHiddenChromeSites((prev) => {
+          const topSiteUrls = new Set(topSites.map((s) => s.url));
+          const pruned = prev.filter((url) => topSiteUrls.has(url));
+          if (pruned.length !== prev.length) {
+            window.chrome.storage.sync.set({ hiddenChromeSites: pruned });
+          }
+          return pruned;
+        });
       });
     } catch (e) {
       console.error('Failed to load data from Chrome storage:', e);
@@ -103,25 +114,37 @@ export default function App() {
   };
 
   const handleRemoveSite = (index: number) => {
-    const isChromeSite = index < visibleChromeSites.length;
+    const visibleChrome = chromeSites
+      .filter((site) => !hiddenChromeSites.includes(site.url))
+      .slice(0, 8);
+    const isChromeSite = index < visibleChrome.length;
 
     if (isChromeSite) {
-      const siteUrl = visibleChromeSites[index].url;
-      const newHidden = [...hiddenChromeSites, siteUrl];
-      setHiddenChromeSites(newHidden);
-      window.chrome.storage.sync.set({ hiddenChromeSites: newHidden });
+      const siteUrl = visibleChrome[index].url;
+      setHiddenChromeSites((prev) => {
+        if (prev.includes(siteUrl)) {
+          return prev; // Already hidden, no-op
+        }
+        const newHidden = [...prev, siteUrl].slice(-MAX_HIDDEN_SITES);
+        window.chrome.storage.sync.set({ hiddenChromeSites: newHidden });
+        return newHidden;
+      });
     } else {
-      const customIndex = index - visibleChromeSites.length;
-      const updatedSites = customSites.filter((_, i) => i !== customIndex);
-      setCustomSites(updatedSites);
-      window.chrome.storage.sync.set({ customSites: updatedSites });
+      const customIndex = index - visibleChrome.length;
+      setCustomSites((prev) => {
+        const updatedSites = prev.filter((_, i) => i !== customIndex);
+        window.chrome.storage.sync.set({ customSites: updatedSites });
+        return updatedSites;
+      });
     }
   };
 
   const handleAddSite = (site: Site) => {
-    const newCustomSites = [...customSites, site];
-    setCustomSites(newCustomSites);
-    window.chrome.storage.sync.set({ customSites: newCustomSites });
+    setCustomSites((prev) => {
+      const newCustomSites = [...prev, site];
+      window.chrome.storage.sync.set({ customSites: newCustomSites });
+      return newCustomSites;
+    });
   };
 
   if (loading) {
