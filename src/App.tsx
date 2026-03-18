@@ -13,6 +13,50 @@ import { Site } from './types';
 const TOP_SITES_LIMIT = 10;
 const VISIBLE_SITES_LIMIT = 8;
 
+function isExtensionContext(): boolean {
+  return (
+    typeof window !== 'undefined' &&
+    typeof window.chrome !== 'undefined' &&
+    typeof window.chrome.storage !== 'undefined'
+  );
+}
+
+function chromeStorageGet<T>(keys: string[]): Promise<T> {
+  return new Promise((resolve, reject) => {
+    window.chrome.storage.sync.get(keys, (result) => {
+      if (window.chrome.runtime.lastError) {
+        reject(new Error(window.chrome.runtime.lastError.message));
+      } else {
+        resolve(result as T);
+      }
+    });
+  });
+}
+
+function chromeStorageSet(data: Record<string, unknown>): Promise<void> {
+  return new Promise((resolve, reject) => {
+    window.chrome.storage.sync.set(data, () => {
+      if (window.chrome.runtime.lastError) {
+        reject(new Error(window.chrome.runtime.lastError.message));
+      } else {
+        resolve();
+      }
+    });
+  });
+}
+
+function chromeTopSitesGet(): Promise<chrome.topSites.MostVisitedURL[]> {
+  return new Promise((resolve, reject) => {
+    window.chrome.topSites.get((sites) => {
+      if (window.chrome.runtime.lastError) {
+        reject(new Error(window.chrome.runtime.lastError.message));
+      } else {
+        resolve(sites);
+      }
+    });
+  });
+}
+
 export default function App() {
   const [birthdate, setBirthdate] = useState<Date | null>(null);
   const [name, setName] = useState<string>('');
@@ -24,8 +68,10 @@ export default function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [editingSites, setEditingSites] = useState(false);
   const [weeksRemaining, setWeeksRemaining] = useState<number>(0);
+  const [dataLoaded, setDataLoaded] = useState(false);
 
-  const isInitialMount = useRef(true);
+  const hiddenSitesInitialized = useRef(false);
+  const customSitesInitialized = useRef(false);
 
   const visibleChromeSites = chromeSites.filter(
     (site) => !hiddenChromeSites.includes(site.url)
@@ -48,26 +94,24 @@ export default function App() {
   }, [birthdate, lifeExpectancy]);
 
   useEffect(() => {
+    if (!isExtensionContext()) {
+      setLoading(false);
+      setDataLoaded(true);
+      return;
+    }
+
     const loadData = async () => {
       try {
-        // Load storage data first
-        const storageData = await new Promise<{
-          birthdate?: string;
-          name?: string;
-          customSites?: Site[];
-          lifeExpectancy?: number;
-          hiddenChromeSites?: string[];
-        }>((resolve) => {
-          window.chrome.storage.sync.get(
-            ['birthdate', 'name', 'customSites', 'lifeExpectancy', 'hiddenChromeSites'],
-            resolve,
-          );
-        });
-
-        // Load top sites
-        const topSitesData = await new Promise<chrome.topSites.MostVisitedURL[]>((resolve) => {
-          window.chrome.topSites.get(resolve);
-        });
+        const [storageData, topSitesData] = await Promise.all([
+          chromeStorageGet<{
+            birthdate?: string;
+            name?: string;
+            customSites?: Site[];
+            lifeExpectancy?: number;
+            hiddenChromeSites?: string[];
+          }>(['birthdate', 'name', 'customSites', 'lifeExpectancy', 'hiddenChromeSites']),
+          chromeTopSitesGet(),
+        ]);
 
         const topSites = topSitesData.slice(0, TOP_SITES_LIMIT).map((site) => ({
           url: site.url,
@@ -82,7 +126,7 @@ export default function App() {
 
         // Persist pruned list if it changed
         if (prunedHidden.length !== storedHidden.length) {
-          window.chrome.storage.sync.set({ hiddenChromeSites: prunedHidden });
+          await chromeStorageSet({ hiddenChromeSites: prunedHidden });
         }
 
         // Set all state
@@ -100,36 +144,48 @@ export default function App() {
         }
         setHiddenChromeSites(prunedHidden);
         setChromeSites(topSites);
-        setLoading(false);
+
+        // Mark refs as initialized after setting state from storage
+        hiddenSitesInitialized.current = true;
+        customSitesInitialized.current = true;
       } catch (e) {
         console.error('Failed to load data from Chrome storage:', e);
+      } finally {
         setLoading(false);
+        setDataLoaded(true);
       }
     };
 
     loadData();
   }, []);
 
-  // Persist hiddenChromeSites changes (skip initial mount)
+  // Persist hiddenChromeSites changes (skip until initialized)
   useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
+    if (!dataLoaded || !hiddenSitesInitialized.current || !isExtensionContext()) {
       return;
     }
-    window.chrome.storage.sync.set({ hiddenChromeSites });
-  }, [hiddenChromeSites]);
+    chromeStorageSet({ hiddenChromeSites }).catch((e) => {
+      console.error('Failed to persist hiddenChromeSites:', e);
+    });
+  }, [hiddenChromeSites, dataLoaded]);
 
-  // Persist customSites changes
+  // Persist customSites changes (skip until initialized)
   useEffect(() => {
-    if (isInitialMount.current) {
+    if (!dataLoaded || !customSitesInitialized.current || !isExtensionContext()) {
       return;
     }
-    window.chrome.storage.sync.set({ customSites });
-  }, [customSites]);
+    chromeStorageSet({ customSites }).catch((e) => {
+      console.error('Failed to persist customSites:', e);
+    });
+  }, [customSites, dataLoaded]);
 
   const handleBirthdateSubmit = (date: Date) => {
     setBirthdate(date);
-    window.chrome.storage.sync.set({ birthdate: date.toISOString() });
+    if (isExtensionContext()) {
+      chromeStorageSet({ birthdate: date.toISOString() }).catch((e) => {
+        console.error('Failed to persist birthdate:', e);
+      });
+    }
   };
 
   const handleSettingsSave = (
@@ -141,11 +197,15 @@ export default function App() {
     setBirthdate(newBirthdate);
     setLifeExpectancy(newLifeExpectancy);
 
-    window.chrome.storage.sync.set({
-      name: newName,
-      birthdate: newBirthdate.toISOString(),
-      lifeExpectancy: newLifeExpectancy,
-    });
+    if (isExtensionContext()) {
+      chromeStorageSet({
+        name: newName,
+        birthdate: newBirthdate.toISOString(),
+        lifeExpectancy: newLifeExpectancy,
+      }).catch((e) => {
+        console.error('Failed to persist settings:', e);
+      });
+    }
   };
 
   const handleRemoveSite = (index: number) => {
